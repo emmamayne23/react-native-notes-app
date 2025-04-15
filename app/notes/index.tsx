@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { addNote, getNotes } from "@/utils/noteService";
+import { getNotes, addNote, deleteNote, editNote } from "@/utils/noteService";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AddNoteModal from "@/components/AddNoteModal";
 
@@ -22,7 +22,10 @@ type NotesArray = {
 export default function NotesScreen() {
   const [notes, setNotes] = useState<NotesArray[] | null>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [newNote, setNewNote] = useState<string>("");
+  const [newTitle, setNewTitle] = useState<string>("");
+  const [newContent, setNewContent] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [noteIdToEdit, setNoteIdToEdit] = useState<string | null>()
 
   useEffect(() => {
     fetchNotes();
@@ -33,29 +36,76 @@ export default function NotesScreen() {
     setNotes(data);
   };
 
-  const submitNote = () => {}
+  const submitNote = async () => {
+    if (!newTitle || !newContent) return;
+
+    try {
+      if(isEditing && noteIdToEdit) {
+        await editNote(noteIdToEdit, newTitle, newContent)
+      } else {
+        await addNote(newTitle, newContent);
+      }
+      await fetchNotes(); // refresh notes list
+
+      setNewTitle("");
+      setNewContent("");
+      setIsModalVisible(false); // close modal
+      setIsEditing(false)
+      setNoteIdToEdit(null)
+    } catch (error) {
+      console.error("Error creating note:", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteNote(id);
+      await fetchNotes();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  }
 
   return (
     <View style={styles.mainContainer}>
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.noteContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.content}>{item.content}</Text>
-          </View>
-        )}
-      />
+      {notes && notes.length === 0 ? (
+        <Text style={{ textAlign: "center", marginTop: 20 }}>No notes yet</Text>
+      ) : (
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity 
+              onLongPress={() => handleDelete(item.id)}
+              onPress={() => {
+                setIsModalVisible(true);
+                setNewTitle(item.title);
+                setNewContent(item.content);
+                setNoteIdToEdit(item.id);
+                setIsEditing(true);
+              }}
+              >
+              <View style={styles.noteContainer}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.content}>{item.content}</Text>
+            </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
 
       <View>
         {isModalVisible && (
           <AddNoteModal
             isModalVisible={isModalVisible}
-             setIsModalVisible={setIsModalVisible}
-              newNote={newNote}
-               setNewNote={setNewNote}
-                submitNote={submitNote} />
+            setIsModalVisible={setIsModalVisible}
+            newTitle={newTitle}
+            setNewTitle={setNewTitle}
+            submitNote={submitNote}
+            newContent={newContent}
+            setNewContent={setNewContent}
+            isEditing={isEditing}
+          />
         )}
       </View>
 

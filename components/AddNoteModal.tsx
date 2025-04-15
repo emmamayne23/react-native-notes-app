@@ -3,13 +3,16 @@ import { View, Text, Modal, TextInput, TouchableOpacity, StyleSheet } from 'reac
 
 interface AddNoteModalProps {
     setIsModalVisible: (visible: boolean) => void,
-    newNote: string,
-    setNewNote: (note: string) => void,
+    newTitle: string,
+    setNewTitle: (note: string) => void,
+    newContent: string,
+    setNewContent: (content: string) => void
     isModalVisible: boolean,
-    submitNote: () => void
+    submitNote: () => void,
+    isEditing: boolean
 }
 
-export default function AddNoteModal({ setIsModalVisible, newNote, setNewNote, isModalVisible, submitNote }: AddNoteModalProps) {
+export default function AddNoteModal({ setIsModalVisible, newTitle, setNewTitle, newContent, setNewContent, isModalVisible, submitNote, isEditing }: AddNoteModalProps) {
   return (
     <View>
       <Modal 
@@ -20,13 +23,21 @@ export default function AddNoteModal({ setIsModalVisible, newNote, setNewNote, i
             >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Add a New Note</Text>
+              <Text style={styles.modalTitle}>{isEditing ? "Edit Note" : "Add a New Note"}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter note ..."
+                  placeholder="Enter title ..."
                   placeholderTextColor={"#aaa"}
-                  value={newNote}
-                  onChangeText={setNewNote}
+                  value={newTitle}
+                  onChangeText={setNewTitle}
+                />
+
+                <TextInput 
+                style={styles.input}
+                  placeholder="Content here ..."
+                  placeholderTextColor={"#aaa"}
+                  value={newContent}
+                  onChangeText={setNewContent}
                 />
 
                 <View style={styles.modalButtons}>
