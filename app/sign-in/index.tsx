@@ -14,7 +14,7 @@ export default function SignInScreen() {
   const handleSignIn = async () => {
     try {
       await signIn(email, password);
-      router.navigate("/notes");
+      router.navigate("/");
     } catch (error: any) {
       console.error("Could not Sign In");
       setError(error.message || "Something went wrong");

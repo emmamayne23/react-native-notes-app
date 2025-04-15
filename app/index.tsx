@@ -12,7 +12,7 @@ export default function Index() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.replace("/sign-in");
+      // router.replace("/sign-in");
     } catch (error) {
       console.error("Failed to sign out", error);
     }
